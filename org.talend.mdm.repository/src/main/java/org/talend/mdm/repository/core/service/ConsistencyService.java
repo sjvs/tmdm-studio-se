@@ -69,6 +69,7 @@ import org.talend.mdm.repository.ui.dialogs.consistency.ConsistencyConflictDialo
 import org.talend.mdm.repository.ui.preferences.PreferenceConstants;
 import org.talend.mdm.repository.utils.DigestUtil;
 import org.talend.mdm.repository.utils.RepositoryResourceUtil;
+import org.talend.mdm.repository.utils.UIUtil;
 
 import com.amalto.workbench.models.TreeObject;
 import com.amalto.workbench.utils.XtentisException;
@@ -81,7 +82,7 @@ import com.amalto.workbench.webservices.XtentisPort;
 
 /**
  * created by HHB on 2013-7-18 Detailled comment
- *
+ * 
  */
 public class ConsistencyService {
 
@@ -366,35 +367,36 @@ public class ConsistencyService {
     public ConsistencyCheckResult checkConsistency(MDMServerDef serverDef, Map<IRepositoryViewObject, Integer> viewObCmdOpjMap)
             throws XtentisException, RemoteException {
         Collection<IRepositoryViewObject> viewObjs = viewObCmdOpjMap.keySet();
-        updateCurrentlDigestValue(viewObjs);
-        Map<IRepositoryViewObject, WSDigest> viewObjMap = queryServerDigestValue(serverDef, viewObjs);
-        int conflictCount = getConflictCount(viewObjMap);
-        if (conflictCount > 0) {
-            ConsistencyCheckResult result = null;
-            if (isWarnUserWhenConflict()) {
-                ConfirmConflictMessageDialog confirmDialog = new ConfirmConflictMessageDialog(getShell(), conflictCount);
-                int returnValue = confirmDialog.open();
-                if (returnValue == IDialogConstants.OK_ID) {
-                    int strategy = confirmDialog.getStrategy();
-                    result = getCheckResultByStrategy(strategy, viewObjMap, viewObCmdOpjMap);
-                } else if (returnValue == IDialogConstants.DETAILS_ID) {
-                    ConsistencyConflictDialog dialog = new ConsistencyConflictDialog(getShell(), conflictCount, viewObjMap,
-                            viewObCmdOpjMap);
-                    dialog.open();
-                    result = dialog.getResult();
+        if (UIUtil.isWorkInUI()) {
+            updateCurrentlDigestValue(viewObjs);
+            Map<IRepositoryViewObject, WSDigest> viewObjMap = queryServerDigestValue(serverDef, viewObjs);
+            int conflictCount = getConflictCount(viewObjMap);
+            if (conflictCount > 0) {
+                ConsistencyCheckResult result = null;
+                if (isWarnUserWhenConflict()) {
+                    ConfirmConflictMessageDialog confirmDialog = new ConfirmConflictMessageDialog(getShell(), conflictCount);
+                    int returnValue = confirmDialog.open();
+                    if (returnValue == IDialogConstants.OK_ID) {
+                        int strategy = confirmDialog.getStrategy();
+                        result = getCheckResultByStrategy(strategy, viewObjMap, viewObCmdOpjMap);
+                    } else if (returnValue == IDialogConstants.DETAILS_ID) {
+                        ConsistencyConflictDialog dialog = new ConsistencyConflictDialog(getShell(), conflictCount, viewObjMap,
+                                viewObCmdOpjMap);
+                        dialog.open();
+                        result = dialog.getResult();
+                    } else {
+                        result = new ConsistencyCheckResult();
+                    }
                 } else {
-                    result = new ConsistencyCheckResult();
+                    int strategy = getConflictStrategy();
+                    result = getCheckResultByStrategy(strategy, viewObjMap, viewObCmdOpjMap);
                 }
-            } else {
-                int strategy = getConflictStrategy();
-                result = getCheckResultByStrategy(strategy, viewObjMap, viewObCmdOpjMap);
-            }
-            correctCheckResult(result);
-            return result;
+                correctCheckResult(result);
+                return result;
 
-        } else {
-            return new ConsistencyCheckResult(viewObjs);
+            }
         }
+        return new ConsistencyCheckResult(viewObjs);
 
     }
 
@@ -492,7 +494,7 @@ public class ConsistencyService {
 
     /**
      * DOC HHB Comment method "getCompareResult".
-     *
+     * 
      * @param cd current digest value
      * @param ld local digest value
      * @param rd remote digest value
@@ -755,7 +757,7 @@ public class ConsistencyService {
 
     /**
      * caculate and update local digest value
-     *
+     * 
      * @param viewObj
      */
     public void updateLocalDigestValue(IRepositoryViewObject viewObj) {

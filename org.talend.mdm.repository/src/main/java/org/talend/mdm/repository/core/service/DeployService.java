@@ -28,13 +28,10 @@ import org.apache.log4j.Logger;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.internal.Workbench;
 import org.eclipse.ui.progress.IProgressService;
@@ -42,8 +39,6 @@ import org.talend.core.GlobalServiceRegister;
 import org.talend.core.model.properties.Item;
 import org.talend.core.model.repository.ERepositoryObjectType;
 import org.talend.core.model.repository.IRepositoryViewObject;
-import org.talend.designer.core.ui.MultiPageTalendEditor;
-import org.talend.designer.core.ui.editor.ProcessEditorInput;
 import org.talend.mdm.repository.core.IServerObjectRepositoryType;
 import org.talend.mdm.repository.core.command.CommandManager;
 import org.talend.mdm.repository.core.command.CompoundCommand;
@@ -62,6 +57,7 @@ import org.talend.mdm.repository.ui.dialogs.deploy.DeployStatusDialog;
 import org.talend.mdm.repository.ui.dialogs.message.MultiStatusDialog;
 import org.talend.mdm.repository.ui.preferences.PreferenceConstants;
 import org.talend.mdm.repository.utils.RepositoryResourceUtil;
+import org.talend.mdm.repository.utils.UIUtil;
 
 import com.amalto.workbench.utils.XtentisException;
 
@@ -90,7 +86,7 @@ public class DeployService {
 
         /**
          * DOC hbhong DeployStatus constructor comment.
-         *
+         * 
          * @param severity
          * @param pluginId
          * @param message
@@ -207,6 +203,9 @@ public class DeployService {
 
     public void updateServerConsistencyStatus(MDMServerDef serverDef, IStatus mainStatus) throws XtentisException,
             RemoteException {
+        if (!UIUtil.isWorkInUI()) {
+            return;
+        }
         if (mainStatus.isMultiStatus()) {
             Set<IRepositoryViewObject> viewObjs = new HashSet<IRepositoryViewObject>();
             for (IStatus childStatus : mainStatus.getChildren()) {
@@ -261,19 +260,21 @@ public class DeployService {
     }
 
     public void generateConsistencyCancelDeployStatus(IStatus mainStatus, List<IRepositoryViewObject> cancelViewObjs) {
-        for (IRepositoryViewObject viewObj : cancelViewObjs) {
-            ICommand cancelCmd = CommandManager.getInstance().getNewCommand(ICommand.CMD_NOP);
-            cancelCmd.updateViewObject(viewObj);
-            DeployStatus cancelStatus = DeployStatus.getInfoStatus(cancelCmd, Messages.DeployService_conflictCancelStatus
-                    + viewObj.getLabel());
-            ((MultiStatus) mainStatus).add(cancelStatus);
+        if (UIUtil.isWorkInUI()) {
+            for (IRepositoryViewObject viewObj : cancelViewObjs) {
+                ICommand cancelCmd = CommandManager.getInstance().getNewCommand(ICommand.CMD_NOP);
+                cancelCmd.updateViewObject(viewObj);
+                DeployStatus cancelStatus = DeployStatus.getInfoStatus(cancelCmd, Messages.DeployService_conflictCancelStatus
+                        + viewObj.getLabel());
+                ((MultiStatus) mainStatus).add(cancelStatus);
+            }
         }
 
     }
 
     /**
      * work for updater server operation.
-     *
+     * 
      * @param serverDef
      * @param viewObjs
      * @param selectededCommands
