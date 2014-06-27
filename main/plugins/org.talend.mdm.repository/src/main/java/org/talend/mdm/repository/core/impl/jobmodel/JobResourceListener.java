@@ -141,7 +141,7 @@ public class JobResourceListener extends AbstractRepositoryResourceChangeListene
     private void removeLastServerInfo(Item item) {
         Property property = item.getProperty();
         EMap additionalProperties = property.getAdditionalProperties();
-        if (additionalProperties != null) {
+        if (additionalProperties != null && additionalProperties.containsKey(RepositoryResourceUtil.PROP_LAST_SERVER_DEF)) {
             RepositoryResourceUtil.setLastServerDef(item, null);
             ProxyRepositoryFactory factory = ProxyRepositoryFactory.getInstance();
             try {
