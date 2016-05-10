@@ -32,6 +32,7 @@ import javax.net.ssl.SSLPeerUnverifiedException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpMessage;
@@ -39,6 +40,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.HttpVersion;
 import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.AuthenticationException;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.AuthCache;
 import org.apache.http.client.ResponseHandler;
@@ -233,12 +235,24 @@ public class HttpClientUtil {
         HttpUriRequest request = createUploadFileToServerRequest(URL, username, localFilename);
         DefaultHttpClient client = wrapAuthClient(URL, username, password);
         HttpContext preemptiveContext = getPreemptiveContext(URL);
+        authenticate(username, password, request, preemptiveContext);
         String errMessage = Messages.Util_21 + "%s" + Messages.Util_22 + "%s"; //$NON-NLS-1$//$NON-NLS-2$
         String content = getTextContent(client, request, preemptiveContext, errMessage);
         if (null == content) {
             throw new XtentisException("no response content"); //$NON-NLS-1$
         }
         return content;
+    }
+
+    private static void authenticate(String username, String password, HttpUriRequest request, HttpContext preemptiveContext) {
+        try {
+            BasicScheme basicScheme = new BasicScheme();
+            Header authenticateHeader = basicScheme.authenticate(new UsernamePasswordCredentials(username, password),
+                    request, preemptiveContext);
+            request.addHeader(authenticateHeader);
+        } catch (AuthenticationException e) {
+            log.error(e.getMessage(), e);
+        }
     }
 
     private static HttpUriRequest createUploadFileToServerRequest(String URL, String userName, final String fileName) {
@@ -415,6 +429,7 @@ public class HttpClientUtil {
         HttpUriRequest request = createUploadRequest(URL, username, localFilename, filename, imageCatalog, picturePathMap);
         DefaultHttpClient client = wrapAuthClient(URL, username, password);
         HttpContext preemptiveContext = getPreemptiveContext(URL);
+        authenticate(username, password, request, preemptiveContext);
         String errMessage = Messages.Util_25 + "%s" + Messages.Util_26 + "%s"; //$NON-NLS-1$//$NON-NLS-2$
         String content = getTextContent(client, request, preemptiveContext, errMessage);
         if (null == content) {
