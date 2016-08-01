@@ -28,59 +28,71 @@ import org.eclipse.swt.widgets.Display;
 
 public class ElementFKInfoColorProvider {
 
-	private Map<RGB, Color> colorTable = new HashMap<RGB, Color>(10);
-	private Map<String, IToken> tokenTable = new HashMap<String, IToken>(10);
-	IPreferenceStore store;
+    private Map<RGB, Color> colorTable = new HashMap<RGB, Color>(10);
 
-	public ElementFKInfoColorProvider(IPreferenceStore store) {
-		this.store = store;
-	}
+    private Map<String, IToken> tokenTable = new HashMap<String, IToken>(10);
 
-	public IToken getToken(String prefKey){
-	   Token token = (Token) tokenTable.get(prefKey);
-	   if (token == null){
-		  String colorName = store.getString(prefKey);
-		  RGB rgb = StringConverter.asRGB(colorName);
-		  token = new Token(new TextAttribute(getColor(rgb)));
-		  tokenTable.put(prefKey, token);
-	   }
-	   return token;
-	}
+    IPreferenceStore store;
 
-	public void dispose(){
-		Iterator<Color> e = colorTable.values().iterator();
-		while (e.hasNext()){
-			e.next().dispose();
-		}
-	}
+    public ElementFKInfoColorProvider(IPreferenceStore store) {
+        this.store = store;
+    }
 
-	public Color getColor(String prefKey){
-		  String colorName = store.getString(prefKey);
-		  RGB rgb = StringConverter.asRGB(colorName);
-		  return getColor(rgb);
-	}
+    public IToken getToken(String prefKey) {
+        Token token = (Token) tokenTable.get(prefKey);
+        if (token == null) {
+            String colorName = store.getString(prefKey);
+            if (colorName == null || colorName.isEmpty()) {
+                if (prefKey.equals(ElementFKInfoConfiguration.PREF_COLOR_DEFAULT)) {
+                    colorName = "0,128,0"; //$NON-NLS-1$
+                } else if (prefKey.equals(ElementFKInfoConfiguration.PREF_COLOR_STRING)) {
+                    colorName = "0,0,255"; //$NON-NLS-1$
+                } else if (prefKey.equals(ElementFKInfoConfiguration.PREF_COLOR_KEYWORD)) {
+                    colorName = "0,0,128"; //$NON-NLS-1$
+                }
 
-	private Color getColor(RGB rgb) {
+            }
+            RGB rgb = StringConverter.asRGB(colorName);
+            token = new Token(new TextAttribute(getColor(rgb)));
+            tokenTable.put(prefKey, token);
+        }
+        return token;
+    }
+
+    public void dispose() {
+        Iterator<Color> e = colorTable.values().iterator();
+        while (e.hasNext()) {
+            e.next().dispose();
+        }
+    }
+
+    public Color getColor(String prefKey) {
+        String colorName = store.getString(prefKey);
+        RGB rgb = StringConverter.asRGB(colorName);
+        return getColor(rgb);
+    }
+
+    private Color getColor(RGB rgb) {
         Color color = colorTable.get(rgb);
-		if (color == null){
-		   color = new Color(Display.getCurrent(), rgb);
-		   colorTable.put(rgb, color);
-		}
-		return color;
-	}
+        if (color == null) {
+            color = new Color(Display.getCurrent(), rgb);
+            colorTable.put(rgb, color);
+        }
+        return color;
+    }
 
-	public boolean affectsTextPresentation(PropertyChangeEvent event){
-	   Token token = (Token) tokenTable.get(event.getProperty());
-	   return (token != null);
-	}
+    public boolean affectsTextPresentation(PropertyChangeEvent event) {
+        Token token = (Token) tokenTable.get(event.getProperty());
+        return (token != null);
+    }
 
-	public void handlePreferenceStoreChanged(PropertyChangeEvent event){
-	   String prefKey = event.getProperty();
-	   Token token = (Token) tokenTable.get(prefKey);
-	   if (token != null){
-		  String colorName = store.getString(prefKey);
-		  RGB rgb = StringConverter.asRGB(colorName);
-		  token.setData(new TextAttribute(getColor(rgb)));
-	   }
-	}
+    public void handlePreferenceStoreChanged(PropertyChangeEvent event) {
+        String prefKey = event.getProperty();
+        Token token = (Token) tokenTable.get(prefKey);
+        if (token != null) {
+            String colorName = store.getString(prefKey);
+            RGB rgb = StringConverter.asRGB(colorName);
+            token.setData(new TextAttribute(getColor(rgb)));
+        }
+    }
 }
