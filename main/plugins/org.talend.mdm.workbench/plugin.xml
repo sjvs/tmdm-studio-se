@@ -482,21 +482,7 @@
             context="MDM"
             language="java"
             message="Required for using this component."
-            name="dom4j-1.6.1.jar" mvn_uri="mvn:org.talend.libraries/dom4j-1.6.1/6.1.0" 
-            required="true">
-      </libraryNeeded>
-      <libraryNeeded
-            context="MDM"
-            language="java"
-            message="Required for using this component."
             name="dtdparser121.jar" mvn_uri="mvn:org.talend.libraries/dtdparser121/6.1.0" 
-            required="true">
-      </libraryNeeded>
-      <libraryNeeded
-            context="MDM"
-            language="java"
-            message="Required for using this component."
-            name="jaxen-1.1-beta-6.jar" mvn_uri="mvn:org.talend.libraries/jaxen-1.1-beta-6/6.0.0" 
             required="true">
       </libraryNeeded>
             <libraryNeeded
@@ -504,13 +490,6 @@
             language="java"
             message="Required for using this component."
             name="mail.jar" mvn_uri="mvn:org.talend.libraries/mail/6.0.0" 
-            required="true">
-      </libraryNeeded>
-      <libraryNeeded
-            context="MDM"
-            language="java"
-            message="Required for using this component."
-            name="relaxngDatatype.jar" mvn_uri="mvn:org.talend.libraries/relaxngDatatype/6.1.0" 
             required="true">
       </libraryNeeded>
       <libraryNeeded
@@ -528,24 +507,10 @@
                required="true">
       </libraryNeeded>
       <libraryNeeded
-               context="MDM"
-               language="java"
-                           message="Required for using this component."
-               name="trang.jar" mvn_uri="mvn:org.talend.libraries/trang/6.1.0" 
-               required="true">
-      </libraryNeeded>
-      <libraryNeeded
             context="MDM"
             language="java"
             message="Required for using this component."
             name="wsdl4j-1.5.1.jar" mvn_uri="mvn:org.talend.libraries/wsdl4j-1.5.1/6.0.0" 
-            required="true">
-      </libraryNeeded>
-      <libraryNeeded
-            context="MDM"
-            language="java"
-            message="Required for using this component."
-            name="xsdlib.jar" mvn_uri="mvn:org.talend.libraries/xsdlib/6.0.0" 
             required="true">
       </libraryNeeded>
    </extension>
