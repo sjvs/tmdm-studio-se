@@ -650,6 +650,10 @@
             class="org.talend.mdm.repository.core.service.ValidateService"
             serviceId="IValidateService">
       </Service>
+      <Service
+            class="org.talend.mdm.repository.core.service.MDMSSLContextService"
+            serviceId="IMDMService">
+      </Service>
 
    </extension>
    <extension
