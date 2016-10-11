@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: org.talend.mdm.workbench.test
 Bundle-SymbolicName: org.talend.mdm.workbench.test
 Fragment-Host: org.talend.mdm.workbench
-Bundle-Version: 6.1.2.qualifier
+Bundle-Version: 6.1.3.qualifier
 Require-Bundle: org.talend.testutils,
  org.hamcrest,
  org.eclipse.osgi.services
