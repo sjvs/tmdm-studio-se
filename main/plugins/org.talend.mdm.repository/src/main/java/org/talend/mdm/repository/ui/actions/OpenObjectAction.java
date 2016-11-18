@@ -189,9 +189,25 @@ public class OpenObjectAction extends AbstractRepositoryAction implements IIntro
             public void run() {
                 UIJob openJob = new OpenJob();
                 if (exAdapter != null) {
-                    exAdapter.beforeRun(openJob);
+                    if (toOpenDatamodel()) {
+                        exAdapter.beforeRun(openJob);
+                    }
                 }
                 openJob.schedule();
+            }
+
+            private boolean toOpenDatamodel() {
+                boolean toOpenDatamodel = false;
+                List<Object> selectedObject = getSelectedObject();
+                if (!selectedObject.isEmpty()) {
+                    Object object = selectedObject.get(0);
+
+                    if (object instanceof IRepositoryViewObject) {
+                        IRepositoryViewObject viewObj = (IRepositoryViewObject) object;
+                        toOpenDatamodel = viewObj.getRepositoryObjectType() == IServerObjectRepositoryType.TYPE_DATAMODEL;
+                    }
+                }
+                return toOpenDatamodel;
             }
 
         }).start();
