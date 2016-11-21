@@ -599,8 +599,7 @@ public class ImportServerObjectWizard extends Wizard {
 
                 @Override
                 public IStatus runInUIThread(IProgressMonitor monitor) {
-                    // isOverrideAll = btnOverwrite.getSelection();
-                    List<String> importedIds = doImport(selectedObjects, wizardMonitor);
+                    List<String> importedIds = doImport(selectedObjects, monitor);
                     commonViewer.refresh();
                     if (exAdapter != null) {
 
