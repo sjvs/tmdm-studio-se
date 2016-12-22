@@ -56,6 +56,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.editor.FormEditor;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.talend.commons.ui.swt.proposal.ContentProposalAdapterExtended;
 
 import com.amalto.workbench.dialogs.PluginDetailsDialog;
 import com.amalto.workbench.dialogs.XpathSelectDialog;
@@ -65,7 +66,6 @@ import com.amalto.workbench.image.ImageCache;
 import com.amalto.workbench.models.Line;
 import com.amalto.workbench.models.TreeObject;
 import com.amalto.workbench.models.TreeParent;
-import com.amalto.workbench.proposal.ContentProposalAdapterExtended;
 import com.amalto.workbench.providers.XObjectEditorInput;
 import com.amalto.workbench.utils.EInputTemplate;
 import com.amalto.workbench.utils.IConstants;
