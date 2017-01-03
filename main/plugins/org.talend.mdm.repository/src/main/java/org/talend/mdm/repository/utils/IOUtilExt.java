@@ -19,7 +19,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Enumeration;
 
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.ui.internal.wizards.datatransfer.TarEntry;
 import org.eclipse.ui.internal.wizards.datatransfer.TarException;
 import org.eclipse.ui.internal.wizards.datatransfer.TarFile;
@@ -29,18 +28,6 @@ import org.eclipse.ui.internal.wizards.datatransfer.TarFile;
  *
  */
 public class IOUtilExt {
-
-    private static final String TEMP_Folder_NAME = "temp"; //$NON-NLS-1$
-
-    public static File getWorkspaceTempFolder() {
-        String usrDir = ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString();
-        File tempFolder = new File(usrDir + File.separator + TEMP_Folder_NAME + File.separator + System.currentTimeMillis());
-        if (!tempFolder.exists()) {
-            tempFolder.mkdirs();
-        }
-        return tempFolder;
-
-    }
 
     /**
      * Determine whether the file with the given filename is in .tar.gz or .tar format.
@@ -118,17 +105,32 @@ public class IOUtilExt {
                         // stop looping
                         return;
                     } finally {
-                        zin.close();
-                        fout.close();
+                        if (zin != null) {
+                            try {
+                                zin.close();
+                            } catch (Exception e) {
+                                // ignore
+                            }
+                        }
+                        if (fout != null) {
+                            try {
+                                fout.close();
+                            } catch (Exception e) {
+                                // ignore
+                            }
+                        }
                     }
                 }
             }
         } catch (Exception e) {
             exception = e;
         } finally {
-            try {
-                tarFile.close();
-            } catch (IOException e) {
+            if (tarFile != null) {
+                try {
+                    tarFile.close();
+                } catch (IOException e) {
+                    // ignore
+                }
             }
 
             if (exception != null) {
