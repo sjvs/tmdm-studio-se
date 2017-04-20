@@ -13,17 +13,10 @@
 package org.talend.mdm.repository.utils;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Enumeration;
 import java.util.zip.ZipFile;
 
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.ui.internal.wizards.datatransfer.TarEntry;
-import org.eclipse.ui.internal.wizards.datatransfer.TarException;
-import org.eclipse.ui.internal.wizards.datatransfer.TarFile;
 
 /**
  * DOC hbhong class global comment. Detailled comment
@@ -54,7 +47,6 @@ public class IOUtil {
             tempFolder.mkdirs();
         }
         return tempFolder;
-
     }
 
     public static void cleanFolder(File folder) {
@@ -76,101 +68,6 @@ public class IOUtil {
         return new File(path).exists();
     }
 
-    /**
-     * Determine whether the file with the given filename is in .tar.gz or .tar format.
-     * 
-     * @param fileName file to test
-     * @return true if the file is in tar format
-     */
-    public static boolean isTarFile(String fileName) {
-        if (fileName.length() == 0) {
-            return false;
-        }
-
-        TarFile tarFile = null;
-        try {
-            tarFile = new TarFile(fileName);
-        } catch (TarException tarException) {
-            return false;
-        } catch (IOException ioException) {
-            return false;
-        } finally {
-            if (tarFile != null) {
-                try {
-                    tarFile.close();
-                } catch (IOException e) {
-                    // ignore
-                }
-            }
-        }
-
-        return true;
-    }
-
-    public static void extractTarFile(String tarFileName, String targetFolder) throws Exception {
-        Exception exception = null;
-        byte[] buf = new byte[8192];
-        TarFile tarFile = null;
-        try {
-            tarFile = new TarFile(tarFileName);
-            Enumeration<TarEntry> enumeration = tarFile.entries();
-            while (enumeration.hasMoreElements()) {
-                TarEntry entry = enumeration.nextElement();
-
-                File file = new File(targetFolder, entry.getName());
-
-                if (entry.getFileType() == TarEntry.DIRECTORY) {
-                    if (!file.exists()) {
-                        file.mkdir();
-                    }
-                } else {
-
-                    if (!file.getParentFile().exists()) {
-                        file.getParentFile().mkdirs();
-                    }
-
-                    InputStream zin = tarFile.getInputStream(entry);
-                    OutputStream fout = new FileOutputStream(file);
-                    // check if parent folder exists
-                    File dir = file.getParentFile();
-                    if (dir.isDirectory() && !dir.exists()) {
-                        dir.mkdirs();
-                    }
-
-                    try {
-                        while (true) {
-                            int bytesRead = zin.read(buf);
-                            if (bytesRead == -1) { // end of file
-                                break;
-                            }
-                            fout.write(buf, 0, bytesRead);
-
-                        }
-                        fout.flush();
-                    } catch (Exception e) {
-                        exception = e;
-                        // stop looping
-                        return;
-                    } finally {
-                        zin.close();
-                        fout.close();
-                    }
-                }
-            }
-        } catch (Exception e) {
-            exception = e;
-        } finally {
-            try {
-                tarFile.close();
-            } catch (IOException e) {
-            }
-
-            if (exception != null) {
-                // notify caller with exception
-                throw exception;
-            }
-        }
-    }
 
     /**
      * Determine whether the file with the given filename is in .zip or .jar format.
@@ -200,4 +97,5 @@ public class IOUtil {
 
         return true;
     }
+
 }

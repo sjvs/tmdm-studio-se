@@ -29,6 +29,8 @@ import org.talend.mdm.repository.ui.editors.IRepositoryViewEditorInput;
 import org.talend.mdm.repository.ui.editors.XSDEditorInput2;
 import org.talend.mdm.repository.utils.RepositoryResourceUtil;
 
+import com.amalto.workbench.exadapter.ExAdapterManager;
+
 /**
  * DOC hbhong class global comment. Detailled comment <br/>
  * 
@@ -39,21 +41,16 @@ public class DataModelActionProvider extends RepositoryNodeActionProviderAdapter
 
     AbstractRepositoryAction addAction;
 
+    public DataModelActionProvider() {
+
+    }
+
     @Override
     public void initCommonViewer(CommonViewer commonViewer) {
         super.initCommonViewer(commonViewer);
         addAction = new NewDataModelAction();
-
         //
         addAction.initCommonViewer(commonViewer);
-        //
-        // if (Util.IsEnterPrise()) {
-        // deployMatchRuleAction = new DeployMatchRuleAction();
-        // deployMatchRuleAction.initCommonViewer(commonViewer);
-        // undeployMatchRuleAction = new UndeployMatchRuleAction();
-        // undeployMatchRuleAction.initCommonViewer(commonViewer);
-        // }
-
     }
 
     @Override
@@ -74,14 +71,19 @@ public class DataModelActionProvider extends RepositoryNodeActionProviderAdapter
             addAction(actions, deployToLastServerAction, viewObj);
             addAction(actions, deployAnotherToAction, viewObj);
             addAction(actions, undeployAction, viewObj);
-            // if (Util.IsEnterPrise()) {
-            // addAction(actions, deployMatchRuleAction, viewObj);
-            // addAction(actions, undeployMatchRuleAction, viewObj);
-            //
-            // }
+            IDataModelActionProviderExAdapter exAdapter = getExAdapter();
+            if (exAdapter != null && exAdapter.getActions() != null) {
+                for (AbstractRepositoryAction action : exAdapter.getActions()) {
+                    addAction(actions, action, viewObj);
+                }
+            }
         }
         addAction(actions, deployAllAction, viewObj);
         return actions;
+    }
+
+    private IDataModelActionProviderExAdapter getExAdapter() {
+        return ExAdapterManager.getAdapter(this, IDataModelActionProviderExAdapter.class);
     }
 
     @Override

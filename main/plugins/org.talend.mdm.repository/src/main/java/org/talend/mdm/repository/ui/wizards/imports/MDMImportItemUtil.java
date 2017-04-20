@@ -20,6 +20,7 @@ import org.eclipse.ui.internal.wizards.datatransfer.TarFile;
 import org.talend.commons.utils.io.FilesUtils;
 import org.talend.mdm.commmon.util.workbench.ZipToFile;
 import org.talend.mdm.repository.utils.IOUtil;
+import org.talend.mdm.repository.utils.IOUtilExt;
 
 
 /**
@@ -70,7 +71,7 @@ public class MDMImportItemUtil {
 
         String targetFolder = IOUtil.getTempFolder().getAbsolutePath();
         try {
-            IOUtil.extractTarFile(tarFile.getName(), targetFolder);
+            IOUtilExt.extractTarFile(tarFile.getName(), targetFolder);
             File file = new File(targetFolder);
 
             return file.listFiles()[0];

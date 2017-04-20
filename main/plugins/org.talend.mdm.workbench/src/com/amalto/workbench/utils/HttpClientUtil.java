@@ -35,6 +35,7 @@ import org.apache.http.HttpMessage;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.HttpVersion;
+import org.apache.http.StatusLine;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.AuthenticationException;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -101,14 +102,13 @@ public class HttpClientUtil {
         AuthScope authScope = new AuthScope(uri.getHost(), uri.getPort());
         UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(username, password);
         client.getCredentialsProvider().setCredentials(authScope, credentials);
-
         return client;
     }
 
     private static HttpContext getPreemptiveContext(String url) {
         URI uri = URI.create(url);
         HttpHost targetHost = new HttpHost(uri.getHost(), uri.getPort());
-        
+
         return getPreemptiveContext(targetHost);
     }
 
@@ -143,8 +143,7 @@ public class HttpClientUtil {
         return getResponseContentStream(client, get, ""); //$NON-NLS-1$
     }
 
-    public static InputStream getInStreamContentByHttpget(String url, String userName, String password)
-            throws XtentisException {
+    public static InputStream getInStreamContentByHttpget(String url, String userName, String password) throws XtentisException {
         InputStream inputStream = null;
 
         DefaultHttpClient wrapAuthClient = wrapAuthClient(url, userName, password);
@@ -173,8 +172,7 @@ public class HttpClientUtil {
     }
 
     private static HttpUriRequest createUploadRequest(String URL, String userName, String localFilename, String filename,
-            String imageCatalog,
-            HashMap<String, String> picturePathMap) {
+            String imageCatalog, HashMap<String, String> picturePathMap) {
         HttpPost request = new HttpPost(URL);
         MultipartEntity entity = new MultipartEntity();
         if (!Messages.Util_24.equalsIgnoreCase(localFilename)) {
@@ -201,7 +199,7 @@ public class HttpClientUtil {
     public static void addStudioToken(HttpMessage httpMessage, String userName) {
         if (httpMessage != null && userName != null) {
             String[] studioToken = getStudioToken(userName);
-            if(studioToken != null && studioToken.length == 2) {
+            if (studioToken != null && studioToken.length == 2) {
                 httpMessage.addHeader(studioToken[0], studioToken[1]);
             }
         }
@@ -236,8 +234,8 @@ public class HttpClientUtil {
     private static void authenticate(String username, String password, HttpUriRequest request, HttpContext preemptiveContext) {
         try {
             BasicScheme basicScheme = new BasicScheme();
-            Header authenticateHeader = basicScheme.authenticate(new UsernamePasswordCredentials(username, password),
-                    request, preemptiveContext);
+            Header authenticateHeader = basicScheme.authenticate(new UsernamePasswordCredentials(username, password), request,
+                    preemptiveContext);
             request.addHeader(authenticateHeader);
         } catch (AuthenticationException e) {
             log.error(e.getMessage(), e);
@@ -314,8 +312,7 @@ public class HttpClientUtil {
     }
 
     private static byte[] getByteArrayStreamContent(DefaultHttpClient client, HttpUriRequest request, HttpContext context,
-            String message)
-            throws XtentisException {
+            String message) throws XtentisException {
         return getResponseContent(client, request, context, message, byte[].class);
     }
 
@@ -369,15 +366,20 @@ public class HttpClientUtil {
     }
 
     private static <T> T getResponseContent(DefaultHttpClient client, HttpUriRequest request, HttpContext context,
-            String message, Class<T> clz)
-            throws XtentisException {
+            String message, Class<T> clz) throws XtentisException {
         if (null == request) {
             throw new IllegalArgumentException("null request"); //$NON-NLS-1$
         }
         HttpResponse response = null;
         try {
             response = client.execute(request, context);
+            StatusLine statusLine = response.getStatusLine();
+            if (statusLine != null && statusLine.getStatusCode() == 204) {
+                throw new OperationIgnoredException();
+            }
             return wrapResponse(response, message, clz);
+        } catch (OperationIgnoredException ex) {
+            throw ex;
         } catch (XtentisException ex) {
             throw ex;
         } catch (Exception e) {
@@ -450,6 +452,29 @@ public class HttpClientUtil {
         return null;
     }
 
+    public static String invokeCreateTDSCampaignService(String protocol, String host, String port, String contextPath,
+            String username, String password, String modelName) throws XtentisException {
+        try {
+            String url = protocol + host + ":" + port + contextPath + "/services/rest/tds/setup?model=" + modelName; //$NON-NLS-1$ //$NON-NLS-2$ 
+
+            DefaultHttpClient httpClient = wrapAuthClient(url, username, password);
+
+            HttpUriRequest request = new HttpGet(url);
+            request.setHeader("Accept", "application/json"); //$NON-NLS-1$ //$NON-NLS-2$
+            addStudioToken(request, username);
+
+            String errMessage = Messages.Util_21 + "%s" + Messages.Util_22 + "%s"; //$NON-NLS-1$//$NON-NLS-2$
+            String content = getTextContent(httpClient, request, null, errMessage);
+            if (content == null) {
+                content = ""; //$NON-NLS-1$
+            }
+            return content;
+        } catch (SecurityException e) {
+            log.error(e.getMessage(), e);
+        }
+        return null;
+    }
+
     private static HttpUriRequest createModelRequest(String url, String username, boolean isUpdate, String content)
             throws UnsupportedEncodingException {
 
@@ -469,8 +494,7 @@ public class HttpClientUtil {
 
     public static String invokeMatchSimulation(String protocol, String host, int port, String contextPath, String userName,
             String password, String modelName, String entityName, String records) throws XtentisException {
-        String url = protocol
-                + host
+        String url = protocol + host
                 + ":" + port + contextPath + "/services/rest/tasks/matching/explain/?model=" + modelName + "&type=" //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
                 + entityName;
         String contentType = "application/xml;charset=UTF-8"; //$NON-NLS-1$

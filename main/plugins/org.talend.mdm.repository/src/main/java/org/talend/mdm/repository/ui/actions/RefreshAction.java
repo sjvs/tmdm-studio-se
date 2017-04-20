@@ -24,6 +24,7 @@ import org.talend.core.model.repository.IRepositoryViewObject;
 import org.talend.core.repository.model.ProxyRepositoryFactory;
 import org.talend.mdm.repository.core.AbstractRepositoryAction;
 import org.talend.mdm.repository.core.IRepositoryViewGlobalActionHandler;
+import org.talend.mdm.repository.core.service.ImportService;
 import org.talend.mdm.repository.i18n.Messages;
 import org.talend.mdm.repository.model.mdmproperties.ContainerItem;
 
@@ -64,6 +65,8 @@ public class RefreshAction extends AbstractRepositoryAction {
     }
 
     private void updateProject() {
+        ImportService.setImporting(true);// to avoid workflow resource listener udpate workflow
+
         final ProxyRepositoryFactory factory = ProxyRepositoryFactory.getInstance();
 
         try {
@@ -78,6 +81,8 @@ public class RefreshAction extends AbstractRepositoryAction {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
+
+        ImportService.setImporting(false);
     }
 
     @Override

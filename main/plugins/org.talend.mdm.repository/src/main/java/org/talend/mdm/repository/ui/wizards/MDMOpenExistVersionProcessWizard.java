@@ -19,6 +19,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.talend.commons.exception.LoginException;
@@ -35,6 +36,7 @@ import org.talend.mdm.repository.core.IRepositoryNodeConfiguration;
 import org.talend.mdm.repository.core.service.IMDMSVNProviderService;
 import org.talend.mdm.repository.extension.RepositoryNodeConfigurationManager;
 import org.talend.mdm.repository.i18n.Messages;
+import org.talend.mdm.repository.ui.actions.IPostOpenAction;
 import org.talend.mdm.repository.ui.editors.IRepositoryViewEditorInput;
 import org.talend.mdm.repository.ui.navigator.MDMRepositoryView;
 import org.talend.mdm.repository.utils.RepositoryResourceUtil;
@@ -132,7 +134,10 @@ public class MDMOpenExistVersionProcessWizard extends OpenExistVersionProcessWiz
                 .getActivePage();
         try {
             updateEditorInputVersionInfo(editorInput, viewObj);
-            page.openEditor(editorInput, editorInput.getEditorId(), readonly);
+            IEditorPart openedEditor = page.openEditor(editorInput, editorInput.getEditorId(), readonly);
+            if (openedEditor instanceof IPostOpenAction) {
+                ((IPostOpenAction) openedEditor).doPostOpen();
+            }
         } catch (PartInitException e) {
             log.error(e.getMessage(), e);
         }

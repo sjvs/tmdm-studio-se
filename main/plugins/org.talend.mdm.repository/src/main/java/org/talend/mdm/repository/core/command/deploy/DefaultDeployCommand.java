@@ -23,6 +23,7 @@ import org.talend.mdm.repository.core.service.IInteractiveHandler;
 import org.talend.mdm.repository.core.service.InteractiveService;
 import org.talend.mdm.repository.i18n.Messages;
 
+import com.amalto.workbench.utils.OperationIgnoredException;
 import com.amalto.workbench.utils.XtentisException;
 
 /**
@@ -32,6 +33,14 @@ public abstract class DefaultDeployCommand extends AbstractDeployCommand {
 
     @Override
     public IStatus execute(Object params, IProgressMonitor monitor) {
+        IStatus deployStatus = doExecute(params, monitor);
+        if (getDeployStatus() == null) {
+            setDeployStatus(deployStatus);
+        }
+        return deployStatus;
+    }
+
+    private IStatus doExecute(Object params, IProgressMonitor monitor) {
         ERepositoryObjectType type = getViewObjectType();
         String objectName = getLabel();
         IInteractiveHandler handler = InteractiveService.findHandler(type);
@@ -39,7 +48,11 @@ public abstract class DefaultDeployCommand extends AbstractDeployCommand {
             String typeLabel = handler.getLabel();
             monitor.subTask(Messages.bind(Messages.Deploy_text, typeLabel));
             try {
-                if (handler.deploy(this)) {
+                boolean isOK = handler.deploy(this);
+                if (getDeployStatus() != null) {
+                    return getDeployStatus();
+                }
+                if (isOK) {
                     if (getCommandType() == CMD_MODIFY) {
                         return DeployStatus.getOKStatus(this,
                                 Messages.bind(Messages.Deploy_successfully_text, typeLabel, objectName));
@@ -50,6 +63,8 @@ public abstract class DefaultDeployCommand extends AbstractDeployCommand {
                     return DeployStatus.getErrorStatus(this, Messages.bind(Messages.Deploy_fail_text, typeLabel, objectName));
                 }
 
+            } catch (OperationIgnoredException e) {
+                return null;
             } catch (OperationCanceledException e) {
                 return DeployStatus.getInfoStatus(this, Messages.bind(Messages.Deploy_cancel_text, typeLabel, objectName));
             } catch (WebServiceException e) {

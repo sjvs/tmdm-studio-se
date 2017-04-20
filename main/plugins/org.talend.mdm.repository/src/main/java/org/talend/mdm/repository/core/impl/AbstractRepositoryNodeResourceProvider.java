@@ -161,8 +161,13 @@ public abstract class AbstractRepositoryNodeResourceProvider implements IReposit
             for (Object refObj : referenceResources) {
                 ReferenceFileItem fileItem = (ReferenceFileItem) refObj;
 
-                URI uri = fileItem.getContent().eResource().getURI();
-                String name = uri.lastSegment();
+                String name = null;
+                if (fileItem.getName() != null) {
+                    name = fileItem.getName() + "." + fileItem.getExtension(); //$NON-NLS-1$
+                } else {
+                    URI uri = fileItem.getContent().eResource().getURI();
+                    name = uri.lastSegment();
+                }
 
                 if (name != null && name.equals(file.getName())) {
                     return fileItem;

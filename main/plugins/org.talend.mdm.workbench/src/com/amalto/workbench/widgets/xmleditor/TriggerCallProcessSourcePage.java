@@ -14,10 +14,9 @@ package com.amalto.workbench.widgets.xmleditor;
 
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
+import org.talend.commons.ui.swt.proposal.ContentProposalAdapterExtended;
 
-import com.amalto.workbench.proposal.ContentProposalAdapterExtended;
 import com.amalto.workbench.utils.WidgetUtils;
-import com.amalto.workbench.widgets.xmleditor.ExtensibleTextContentEditorPage;
 import com.amalto.workbench.widgets.xmleditor.infoholder.ExternalInfoHolder;
 
 public class TriggerCallProcessSourcePage extends ExtensibleTextContentEditorPage {
